@@ -1,25 +1,39 @@
-import logging, re, datetime, os, time
+import logging, re, datetime, os, time, configparser
 from subprocess import call
 
-memory_file_path = "memory.log"
-logging.basicConfig(
-    format="%(asctime)s %(levelname)s - %(message)s",
-    filename=memory_file_path,
-    level=logging.INFO,
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
-
+memory_file_path_absolute = ""
 
 def main():
+    config = load_config()
+
+    logging.basicConfig(
+            format="%(asctime)s %(levelname)s - %(message)s",
+            filename=memory_file_path_absolute,
+            level=logging.INFO,
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+
     log("Jarvis is starting")
+
+    human = config.get('Settings', 'human')
     today2pm = datetime.datetime.now().replace(
         hour=14, minute=0, second=0, microsecond=0
     )
     if not datetime.datetime.now() > today2pm:
-        log("Roman probably hasn't left yet; too early to welcome him back")
+        log(human + " probably hasn't left yet; too early to welcome him back")
     elif not welcomed_after(today2pm):
-        welcome_roman()
+        welcome_human_audio()
     exit()
+
+def load_config():
+    config_file_relative = 'personal/config.ini'
+    config = configparser.ConfigParser()
+    config.read(config_file_relative)
+    config_file_directory = os.path.dirname(os.path.abspath(config_file_relative))
+    memory_file_relative = config.get('Settings', 'memory_file_path')
+    global memory_file_path_absolute
+    memory_file_path_absolute = os.path.join(config_file_directory, memory_file_relative)
+    return config
 
 
 def welcomed_after(time_cutoff):
@@ -33,7 +47,7 @@ def welcomed_after(time_cutoff):
 
 def remember(action):
     log("Trying to remember if {action} before".format(action=action))
-    for full_memory in reversed(open(memory_file_path).readlines()):
+    for full_memory in reversed(open(memory_file_path_absolute).readlines()):
         # cut off log time and log type
         memory = full_memory[27:]
         if ("Did " + action) in memory and not memory.startswith("Remembered: "):
@@ -48,7 +62,7 @@ def when(memory):
     return memory_datetime
 
 
-def welcome_roman():
+def welcome_human_audio():
     log("Trying to welcome")
     # # play ogg file
     # log("Playing welcome audio")
