@@ -1,3 +1,5 @@
 .env
 personal/
 .vscode/
+.DS_Store
+

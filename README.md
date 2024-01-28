@@ -8,8 +8,9 @@ Create `.env` file with an [OpenAI API key](https://help.openai.com/en/articles/
 `OPENAI_API_KEY=copy_api_key_here`
 
 ## Run AI
-`source openai-env/bin/activate`
 
-`python3 jarvis.py`
+`./run_jarvis.sh`
 
-Type `bye` to exit.
+If you get a 'permission denied' error, run: `chmod +x run_jarvis.sh`
+
+Type `bye` to exit the program.

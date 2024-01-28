@@ -1,13 +1,16 @@
-import time
+import logging
 from openai import OpenAI
+from dotenv import load_dotenv
 
+# load local .env file for the OPENAI_APY_KEY
+load_dotenv()
 client = OpenAI()
 
-# summarize and log our conversations
 # keep the system assistant descriptions updated and previous descriptions logged
-# add config and log files
+# add config
 
 def main():
+    logging.basicConfig(filename='personal/history.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
     human = 'Roman'
     prompt_for_input = '> Hello '+human+'. How are you?\n'
     messages = []
@@ -35,14 +38,25 @@ def parse(instruction, messages):
     return '', messages
 
 def bye_sequence(messages, human):
-    instruction = "Can you give me a summary, which is shorter than 50 words, of our conversation? Also, was there anything I asked you to change about your responses, such as making them shorter, or present them in a different way? If yes, please also write a description, which is shorter than 50 words, of a perfect assistant for someone who requests the type of changes I asked you to make. And please write it from a 'you' perspective, so the description should start out with 'You are an assistant for...'"
+    print('> Summarizing conversation and checking for requested changes...')
+    instruction = "Can you give me a summary, which is shorter than 50 words, of our conversation?"
     messages.append({"role": "user", "content": instruction})
     completion = client.chat.completions.create(
         model="gpt-3.5-turbo", messages=messages
-    )  
-    answer = completion.choices[0].message.content
-    print('> '+answer)
+    )
+    summary = completion.choices[0].message.content
+    log(f'Summary of our conversation: {summary}')
+    instruction = "Was there anything I asked you to change about your responses, such as making them shorter, or presenting them in a different way? If yes, please also write a description, which is shorter than 50 words, of a perfect assistant for someone who requests the type of changes I asked you to make. And please write it from a 'you' perspective, so the description should start out with 'You are an assistant for...' If no, please write 'No changes were requested for my responses.'"
+    messages.append({"role": "user", "content": instruction})
+    completion = client.chat.completions.create(
+        model="gpt-3.5-turbo", messages=messages
+    )
+    requested_changes = completion.choices[0].message.content
+    log(f'Requested changes: {requested_changes}')
     print('> Bye '+human)
-    exit()
+    return
+
+def log(text):
+    logging.info(text)
 
 main()
