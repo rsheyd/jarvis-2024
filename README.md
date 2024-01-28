@@ -1,5 +1,5 @@
 # jarvis-2024
-Local terminal AI
+Local terminal interface for chatgpt AI. Provides a "stateful" experience. Unlike regular chatgpt, jarvis-2024 remembers previous conversations, and uses every conversation to update itself to be more personalized for its user.
 
 ## Configure
 
